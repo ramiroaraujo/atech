@@ -148,7 +148,7 @@ class DeployHqClient extends AbstractClient
                 'end_revision'      => ($end_rev) ? $end_rev : '',//$this->projectLatest($permalink),
                 'mode'              => ($mode) ? 'queue' : 'preview',
                 'copy_config_files' => ($copy_config) ? 1 : 0,
-                'email_notify'      => ($email_notify) ? 1 ; 0
+                'email_notify'      => ($email_notify) ? 1 : 0
             )
         );
         $payload = json_encode($payload);
