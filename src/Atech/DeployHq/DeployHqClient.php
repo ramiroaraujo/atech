@@ -66,6 +66,27 @@ class DeployHqClient extends AbstractClient
     }
 
     /**
+     * Create a new project
+     * @param $name
+     * @return string
+     */
+    public function createProject($name)
+    {
+        $payload = array(
+            'project' => array(
+                'name' => $name
+            )
+        );
+        $payload = json_encode($payload);
+        return $this->post('projects', $payload);
+    }
+
+    public function deleteProject($permalink)
+    {
+        return $this->delete('projects/' . $permalink);
+    }
+
+    /**
     * Get current project reivsion from the repository
     *
     * @param string $permalink permalink of project to return
@@ -82,6 +103,27 @@ class DeployHqClient extends AbstractClient
     }
 
     /**
+     * create a repository for the project
+     * @param $permalink
+     * @param $type
+     * @param $url
+     * @param string $default_branch
+     * @return string
+     */
+    public function addRepository($permalink, $type, $url, $default_branch = 'master')
+    {
+        $payload = array(
+            'repository' => array(
+                'scm_type' => $type,
+                'url'      => $url,
+                'branch'   => $default_branch,
+            )
+        );
+        $payload = json_encode($payload);
+        return $this->post("projects/$permalink/repository", $payload);
+    }
+
+    /**
     Servers
     */
 
@@ -95,6 +137,54 @@ class DeployHqClient extends AbstractClient
     public function servers($permalink)
     {
         return $this->get('projects/' . $permalink . '/servers');
+    }
+
+    /**
+     * Add a new server to a project
+     * @param $permalink
+     * @param $data
+     * @return string
+     */
+    public function addServer($permalink, $data)
+    {
+        $payload = array(
+            'server' => $data
+        );
+        $payload = json_encode($payload);
+        return $this->post("projects/$permalink/servers", $payload);
+    }
+
+    /**
+     * Add an SSH command as a hook for deployments
+     * @param $permalink
+     * @param $description
+     * @param $command
+     * @param string $when
+     * @param string $timing
+     * @param string $servers
+     * @param bool $halt_on_error
+     * @return \Atech\Common\Client\the
+     */
+    public function addCommand($permalink, $description, $command, $when = 'after_changes', $timing = 'all', $servers = 'all', $halt_on_error = false)
+    {
+        $payload = array(
+            'command' => [
+                'description'        => $description,
+                'command'            => $command,
+                'cback'              => $when,
+                'timing'             => $timing,
+                'halt_on_error'      => $halt_on_error,
+                'server_identifiers' => $servers,
+            ]
+        );
+        if (is_string($servers) && $servers === 'all') {
+            $payload['command']['all_servers'] = true;
+        } else {
+            //@todo fetch servers and match against domains in array
+        }
+
+        $payload = json_encode($payload);
+        return $this->post("projects/$permalink/commands", $payload);
     }
 
     /**

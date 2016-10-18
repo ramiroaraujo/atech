@@ -121,7 +121,7 @@ class CodebaseClient extends AbstractClient
     /**
     * Create a Project
     *
-    * @param string $project_name project name, 
+    * @param string $project_name project name,
     *                helps to form the short name too, which is returned
     *
     * @return a project object
@@ -245,6 +245,22 @@ class CodebaseClient extends AbstractClient
     public function deleteProjectRepository($permalink, $repo_name)
     {
         return $this->delete($permalink . '/' . $repo_name);
+    }
+
+    /**
+     * Add a repository key to a project
+     * @param $project_permalink
+     * @param $repo_permalink
+     * @param $public_key
+     * @param $description
+     * @return string
+     */
+    public function addProjectRepositoryPublicKey($project_permalink, $repo_permalink, $public_key, $description)
+    {
+        $xml = '<public-key><description>' . $description . '</description>
+            <key>' . $public_key . '</key>
+        </public-key>';
+        return $this->post("$project_permalink/$repo_permalink/public_keys", $xml, 'repository');
     }
 
     /**
@@ -488,10 +504,10 @@ class CodebaseClient extends AbstractClient
     {
         $xml = '<ticket-note>';
         if (isset($note_data['content']) && $note_data['content']) {
-            $xml .= '<content><![CDATA[' . $note_data['content'] . ']]></content>'; 
+            $xml .= '<content><![CDATA[' . $note_data['content'] . ']]></content>';
         }
         if (isset($note_data['time-added']) && $note_data['time-added']) {
-            $xml .= '<time-added>' . $note_data['time-added'] . '</time-added>'; 
+            $xml .= '<time-added>' . $note_data['time-added'] . '</time-added>';
         }
         if (count($ticket_data)) {
             $xml .= '<changes>';
@@ -543,7 +559,7 @@ class CodebaseClient extends AbstractClient
 
     /**
     * Get all time sessions for a project
-    * 
+    *
     * @param string $permalink project shortname/permalink *required
     *
     * @return mixed a set of time sessions or false
@@ -555,7 +571,7 @@ class CodebaseClient extends AbstractClient
 
     /**
     * Get all time sessions added to a project today
-    * 
+    *
     * @param string $permalink project shortname/permalink *required
     *
     * @return mixed a set of time sessions or false
@@ -567,7 +583,7 @@ class CodebaseClient extends AbstractClient
 
     /**
     * Get all time sessions added to a project this week
-    * 
+    *
     * @param string $permalink project shortname/permalink *required
     *
     * @return mixed a set of time sessions or false
@@ -579,7 +595,7 @@ class CodebaseClient extends AbstractClient
 
     /**
     * Get all time sessions added to a project this month
-    * 
+    *
     * @param string $permalink project shortname/permalink *required
     *
     * @return mixed a set of time sessions or false
@@ -633,8 +649,8 @@ class CodebaseClient extends AbstractClient
     * @param string  $permalink  project shortname/permalink *required
     * @param integer $session_id the session id to fetch
     * @param array   $data       data packet for time session
-    *                            summary 
-    *                            minutes 
+    *                            summary
+    *                            minutes
     *                            session-date format is yyyy-mm-dd
     *
     * @return mixed created time session of false
@@ -696,6 +712,30 @@ class CodebaseClient extends AbstractClient
     public function getProjectWikiPage($permalink, $pagelink)
     {
         return $this->get($permalink . '/wiki/' . $pagelink, 'wiki-page');
+    }
+
+    /**
+     * list users in the codebase account
+     * @return string
+     */
+    public function listUsers()
+    {
+        return $this->get('/users');
+    }
+
+    /**
+     * @param $permalink
+     * @param $ids
+     * @return \Atech\Common\Client\the
+     */
+    public function setProjectUsers($permalink, $ids)
+    {
+        $xml = '<users>';
+        foreach ($ids as $id) {
+            $xml .= "<user><id>{$id}</id></user>";
+        }
+        $xml .= '</users>';
+        return $this->post("$permalink/assignments", $xml, 'repository');
     }
 
 }
