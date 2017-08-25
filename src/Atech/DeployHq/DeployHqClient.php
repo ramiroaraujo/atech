@@ -165,7 +165,8 @@ class DeployHqClient extends AbstractClient
      * @param bool $halt_on_error
      * @return \Atech\Common\Client\the
      */
-    public function addCommand($permalink, $description, $command, $when = 'after_changes', $timing = 'all', $servers = 'all', $halt_on_error = false)
+    public function addCommand($permalink, $description, $command, $when = 'after_changes', $timing = 'all', $servers = 'all', $halt_on_error = false,
+                               $timeout = 1800)
     {
         $payload = array(
             'command' => [
@@ -175,7 +176,8 @@ class DeployHqClient extends AbstractClient
                 'timing'             => $timing,
                 'halt_on_error'      => $halt_on_error,
                 'server_identifiers' => $servers,
-            ]
+                'timeout'            => $timeout,
+            ],
         );
         if (is_string($servers) && $servers === 'all') {
             $payload['command']['all_servers'] = true;
